@@ -1,0 +1,24 @@
+clc;
+clear all; %清理数据
+
+%Histogram equalization
+im_input = im2double(imread('.\Pics\1.bmp')); %读取图像
+im_histeq = histeq(im_input); %直方图均衡化
+figure, imshow(im_input); title('原图像'); %显示原图像
+figure, imshow(im_histeq); title('直方图均衡化'); %显示直方图均衡化的图像
+figure, imhist(im_input), title('原图像直方图');%显示原图像直方图  
+figure, imhist(im_histeq), title('直方图均衡化后的直方图');%显示直方图均衡化
+
+%Gamma correction
+im_input = im2double(imread(' .\Pics\3.bmp'));%读取图像
+im_histeq = histeq(im_input);%直方图均衡化
+im_adujst = imadjust(im_input,[0 0.4],[0.1 1]); %伽马校正
+figure, imshow(im_input); title('原图像'); %显示原图像
+figure, imshow(im_adujst); title('对比度增强'); %显示对比度增强的图像
+figure, imshow(im_histeq); title('直方图均衡化');%显示直方图均衡化后的图片
+figure, imhist(im_input), title('原图像直方图');%显示原图像直方图 
+figure, imhist(im_histeq), title('直方图均衡化后的直方图');%显示直方图均衡化后的直方图
+figure, imhist(im_adujst), title('对比度增强后的直方图');%显示对比度增强后的直方图
+
+
+
