@@ -1,0 +1,103 @@
+clc
+clear all
+
+%Remove gaussian noise
+f=imread('.\Pics\test01.jpg'); %读入图像
+im_input = im2double(rgb2gray(f));%读取图像并转为二维灰度图
+im_output1 = spfilt(im_input,'amean',5,5);%算术均值滤波
+im_output2 = spfilt(im_input,'gmean',5,5);%几何均值滤波
+im_output3 = spfilt(im_input,'atrimmed',5,5,24);%修正的阿尔法滤波范围为5x5且d=24
+figure, imshow([im_output1]),title('算术均值滤波');
+figure, imshow([im_output2]),title('几何均值滤波');
+figure, imshow([im_output3]),title('修正的阿尔法滤波');
+subplot(2,2,1);
+imshow(f);
+title('原始图像')   
+%高斯高通滤波
+I=double(f);
+g=fft2(I);
+g=fftshift(g);
+[M,N]=size(g);
+D0=40;
+m=fix(M/2);n=fix(N/2);
+for i=1:M
+       for j=1:N
+           D=sqrt((i-m)^2+(j-n)^2);
+           H=exp(-(D.^2)./(2*(D0^2)));   
+           result(i,j)=(1-H)*g(i,j);
+       end
+end
+result=ifftshift(result);
+J1=ifft2(result);
+J2=uint8(real(J1));
+subplot(2,2,2);
+imshow(J2)
+title('高斯高通滤波后的图像')
+
+%高频强调滤波
+F=0.5+0.75*(1-H);
+G=F*g;
+result2=ifftshift(G);
+J3=ifft2(result2);
+J4=uint8(real(J3));
+subplot(2,2,3)
+imshow(J4)
+title('高频强调滤波后的图像')
+
+%对高频强调滤波后图像进行直方图均衡化
+J5=histeq(J4,256);
+J5=uint8(J5);
+subplot(2,2,4);
+imshow(J5)
+title('直方图均衡化后的图像')
+
+
+%Remove impulse noise
+im_input = im2double(imread('.\Pics\test02.jpg'));%读取图像
+im_put = rgb2gray(im_input);%将图像转化为二维灰度图
+imhist(im_put);%显示图像直方图
+im_output1 = spfilt(im_put,'median',7,7);
+im_output2 = spfilt(im_output1,'median',7,7);
+im_output3 = spfilt(im_output2,'median',7,7);
+im_output4 = spfilt(im_output3,'median',7,7);
+im_output5 = spfilt(im_output4,'median',7,7);
+figure, imshow(im_output5),title('中值滤波结果');%经过多次中值滤波，范围为7x7
+
+
+%Remove Moire effect in frequency domain
+im_input = im2double(imread('.\Pics\test03.jpg'));%读取图像
+figure, imshow(im_input),title('input image');%显示原始图像
+[im_h,im_w]=size(im_input);%得到图像大小
+F=fft2(im_input,500,1500);%对图像进行傅里叶变换
+
+H1=lpfilter('gaussian',im_h,im_w,5);%截止频率为5
+G=H1.*F;
+im_output1=real(ifft2(G));
+figure;imshow(im_output1,[]),title('GLPF D0=5');
+
+H2=lpfilter('gaussian',im_h,im_w,15);%截止频率为15
+G=H2.*F;
+im_output2=real(ifft2(G));
+figure;imshow(im_output2,[]),title('GLPF D0=15');
+
+H3=lpfilter('gaussian',im_h,im_w,30);%截止频率为30
+G=H3.*F;
+im_output3=real(ifft2(G));
+im_output3=rgb2gray(im_output3);
+figure;imshow(im_output3),title('GLPF D0=30');
+
+H4=lpfilter('gaussian',im_h,im_w,30);%截止频率为30且经过直方图自适应处理
+G=H4.*F;
+im_output4=real(ifft2(G));
+im_output4=rgb2gray(im_output4);
+im_output4=adapthisteq(im_output4);
+figure;imshow(im_output4),title('GLPF D0=30 adapthisteq');
+
+H4=lpfilter('gaussian',im_h,im_w,50);%截止频率为50
+G=H4.*F;
+im_output4=real(ifft2(G));
+figure;imshow(im_output4,[]),title('GLPF D0=50');
+
+
+
+
