@@ -1,0 +1,41 @@
+clc;
+clear all;
+
+% 载入图片
+RGB = imread(' .\Pics\test01.jpg');
+figure,imshow(RGB),title('I1');
+
+% 底帽变换，去除不均匀背景
+I = rgb2gray(RGB);
+se = strel('disk',20);
+se1 = strel('square', 3);
+I2 = imbothat(I,se);
+figure,imshow(I2),title('I2');
+
+%对图像进行开运算
+se = strel('disk',2);
+I3 = imopen(I2,se)
+figure,imshow(I3),title('I3');
+
+% 灰度图像二值化，全局阈值分割最大化类间方差
+I4 = imdilate(I3,se1); %对图像进行第一次膨胀
+I5 = imdilate(I4,se1); %对图像进行第二次膨胀
+I6 = imadjust(I5); %图像直方图均衡化
+level = graythresh(I6); %用最大类间方差法找到图片的一个合适的阈值
+BW = im2bw(I6,level); %灰度图像二值化
+figure,imshow(BW),title('BW');
+[L,N] = bwlabel(BW); % N即为目标个数，默认为8邻域连通
+
+% 标记目标物
+figure,imshow(BW),title('BW');
+hold on;
+for k = 1:N
+  [r,c] = find(L == k);
+  rbar = mean(r);
+  cbar = mean(c); 
+plot(cbar,rbar,'marker','o','markeredgecolor','r','markersize',10);
+end
+% 对话框显示目标物个数
+h = dialog('Name','目标个数','position',[580 300 220 100]); % 创建一个对话框窗口
+uicontrol('Style','text','units','pixels','position',[45 40 120 50],'fontsize',15,'parent',h,'string',strcat('第',num2str(t),'张图的染色体数为',num2str(N),'个')); % 创建文本内容
+uicontrol('units','pixels','position',[80 10 50 20],'fontsize',10,'parent',h,'string','确定’,'callback','delete(gcf)'); % 创建【确定】按钮
