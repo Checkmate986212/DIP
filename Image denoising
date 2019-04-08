@@ -1,5 +1,5 @@
-clc
-clear all
+clc;
+clear all;
 
 %Remove gaussian noise
 f=imread('.\Pics\test01.jpg'); %读入图像
