@@ -1,0 +1,58 @@
+clc;
+clear all;
+
+im_input = imread('test01.jpg');
+im_input = rgb2gray(im_input);
+
+%第一块区域
+r=[165 165 200 200];%选区区域的横坐标
+c=[150 440 440 150];%选区区域的纵坐标
+BW=roipoly(im_input,c,r);
+%figure,imshow(BW),title('选中的区域');
+BW = immultiply(BW,im_input);%原图像中选取的部分
+
+%通过直方图选择阈值
+C=histc(BW,0:255);
+n=sum(C');
+N=sum(n);
+t=n/N;
+subplot(132);bar(0:255,t);
+hold off;
+axis([0,255,0,0.003]);
+[p,threshold]=min(t(120:150));
+threshold=threshold+122;
+
+%阈值处理
+t=find(BW>threshold);
+BW(t)=255;
+t=find(BW<threshold);
+BW(t)=0;
+figure,imshow(BW);
+
+%第二块区域
+r=[165 165 200 200];
+c=[50 130 130 50];
+BW1=roipoly(im_input,c,r);
+%  figure,imshow(BW),title('选中的区域');
+BW1 = immultiply(BW1,im_input);
+
+%通过直方图选择阈值
+C=histc(BW1,0:255);
+n=sum(C');
+N=sum(n);
+t=n/N;
+subplot(132);bar(0:255,t);
+hold off;
+axis([0,255,0,0.001]);
+[p,threshold]=min(t(130:160));
+threshold=threshold+155;
+
+%阈值处理
+t=find(BW1>threshold);
+BW1(t)=255;
+t=find(BW1<threshold);
+BW1(t)=0;
+figure,imshow(BW1);
+%两部分合并
+BW = imadd(BW,BW1);
+figure,imshow(BW);
