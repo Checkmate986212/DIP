@@ -1,4 +1,4 @@
 # DIP
-some codes that I wrote while learning DIP
+Some codes that I wrote while learning DIP
 
-traditional method of Digital Image Processing including image 
+Traditional methods of Digital Image Processing
